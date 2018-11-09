@@ -16,6 +16,7 @@ path = "src/lib.rs"
 [dependencies]
 chrono = "^0.4.0"
 error-chain = "^0.10.0"
+futures = { version = "^0.1.0", optional = true }
 hex = "^0.2.0"
 hmac = "^0.4.2"
 reqwest = "^0.9.1"
@@ -27,6 +28,11 @@ url = "^1.5.1"
 rust-ini = "^0.9"
 dirs = "^1.0"
 
+[dev-dependencies]
+tokio = "0.1"
+
 [features]
+default = ["async"]
 no-verify-ssl = []
+async = ["futures"]
 

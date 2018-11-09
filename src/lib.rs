@@ -57,6 +57,9 @@ extern crate chrono;
 extern crate error_chain;
 extern crate hex;
 extern crate hmac;
+#[cfg(feature = "async")]
+#[macro_use]
+extern crate futures;
 extern crate reqwest;
 extern crate serde;
 #[macro_use]
@@ -82,7 +85,7 @@ pub use bucket::Bucket;
 pub use credentials::Credentials;
 pub use error::S3Error;
 pub use region::Region;
-pub use request::{Headers, Query};
+pub use request::{Headers, Query, Response, AsyncResponse};
 pub use serde_types::ListBucketResult;
 
 const LONG_DATE: &str = "%Y%m%dT%H%M%SZ";
