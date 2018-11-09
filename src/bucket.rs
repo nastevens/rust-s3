@@ -11,6 +11,8 @@ use request::{Request, Headers, Query};
 use serde_types::ListBucketResult;
 use error::S3Result;
 
+/// Primary interface to an AWS S3 bucket.
+///
 /// # Example
 /// ```
 /// # use std::env;

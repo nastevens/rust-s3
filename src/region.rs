@@ -3,8 +3,10 @@ use std::str::{self, FromStr};
 
 use error::{S3Result, S3Error};
 
-/// AWS S3 [region identifier](https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region),
-/// passing in custom values is also possible, in that case it is up to you to pass a valid endpoint,
+/// AWS S3 [region identifier](https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region)
+///
+/// In addition to pre-defined regions, passing passing in custom values is
+/// also possible. In that case it is up to you to pass a valid endpoint,
 /// otherwise boom will happen :)
 ///
 /// # Example

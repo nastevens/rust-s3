@@ -18,7 +18,10 @@ pub fn main() -> Result<(), Box<std::error::Error>> {
     let results = bucket.list("", None)?;
     for (list, code) in results {
         assert_eq!(200, code);
-        println!("{:?}", list.contents.len());
+        println!("List of {}:", bucket.name());
+        for obj in list.contents {
+            println!("  {}", obj.key);
+        }
     }
 
     // Make sure that our "test_file" doesn't exist, delete it if it does. Note
