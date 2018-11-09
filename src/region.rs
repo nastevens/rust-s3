@@ -10,7 +10,7 @@ use error::{S3Result, S3Error};
 /// # Example
 /// ```
 /// use std::str::FromStr;
-/// use s3::region::Region;
+/// use s3::Region;
 ///
 /// // Parse from a string
 /// let region: Region = "us-east-1".parse().unwrap();

@@ -20,8 +20,6 @@ use error::{S3Result, ErrorKind};
 use EMPTY_PAYLOAD_SHA;
 use LONG_DATE;
 
-
-
 /// Collection of HTTP headers sent to S3 service, in key/value format.
 pub type Headers = HashMap<String, String>;
 
@@ -29,13 +27,12 @@ pub type Headers = HashMap<String, String>;
 /// format.
 pub type Query = HashMap<String, String>;
 
-
 // Temporary structure for making a request
 pub struct Request<'a> {
-    pub bucket: &'a Bucket,
-    pub path: &'a str,
-    pub command: Command<'a>,
-    pub datetime: DateTime<Utc>,
+    bucket: &'a Bucket,
+    path: &'a str,
+    command: Command<'a>,
+    datetime: DateTime<Utc>,
 }
 
 impl<'a> Request<'a> {
@@ -61,7 +58,7 @@ impl<'a> Request<'a> {
         // generated, there's really no way this should fail.
         let mut url = Url::parse(&url_str).expect("static URL parsing");
 
-        for (key, value) in &self.bucket.extra_query {
+        for (key, value) in self.bucket.extra_query() {
             url.query_pairs_mut().append_pair(key, value);
         }
 
@@ -153,7 +150,7 @@ impl<'a> Request<'a> {
         // the same name.
         let mut headers = self
             .bucket
-            .extra_headers
+            .extra_headers()
             .iter()
             .map(|(k, v)| Ok((k.parse::<HeaderName>()?, v.parse::<HeaderValue>()?)))
             .collect::<Result<HeaderMap, S3Error>>()?;

@@ -13,7 +13,7 @@ use ini::Ini;
 /// ```no_run
 /// # // Do not execute this as it would cause unit tests to attempt to access
 /// # // real user credentials.
-/// use s3::credentials::Credentials;
+/// use s3::Credentials;
 ///
 /// // Load credentials from `[default]` profile
 /// let credentials = Credentials::default();
@@ -35,7 +35,7 @@ use ini::Ini;
 /// credentials file.
 ///
 /// ```
-/// use s3::credentials::Credentials;
+/// use s3::Credentials;
 ///
 /// // Load credentials directly
 /// let access_key = String::from("AKIAIOSFODNN7EXAMPLE");

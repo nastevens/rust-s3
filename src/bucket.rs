@@ -16,8 +16,7 @@ use error::S3Result;
 /// # use std::env;
 /// # env::set_var("AWS_ACCESS_KEY_ID", "AKIAIOSFODNN7EXAMPLE");
 /// # env::set_var("AWS_SECRET_ACCESS_KEY", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY");
-/// use s3::bucket::Bucket;
-/// use s3::credentials::Credentials;
+/// use s3::{Bucket, Credentials};
 ///
 /// let bucket_name = "rust-s3-test";
 /// let region = "us-east-1".parse().unwrap();
@@ -27,11 +26,11 @@ use error::S3Result;
 /// ```
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Bucket {
-    pub name: String,
-    pub region: Region,
-    pub credentials: Credentials,
-    pub extra_headers: Headers,
-    pub extra_query: Query,
+    name: String,
+    region: Region,
+    credentials: Credentials,
+    extra_headers: Headers,
+    extra_query: Query,
 }
 
 impl Bucket {
@@ -43,8 +42,7 @@ impl Bucket {
     /// # use std::env;
     /// # env::set_var("AWS_ACCESS_KEY_ID", "AKIAIOSFODNN7EXAMPLE");
     /// # env::set_var("AWS_SECRET_ACCESS_KEY", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY");
-    /// use s3::bucket::Bucket;
-    /// use s3::credentials::Credentials;
+    /// use s3::{Bucket, Credentials};
     ///
     /// let bucket_name = "rust-s3-test";
     /// let region = "us-east-1".parse().unwrap();
@@ -67,8 +65,7 @@ impl Bucket {
     /// # Example:
     ///
     /// ```rust,no_run
-    /// use s3::bucket::Bucket;
-    /// use s3::credentials::Credentials;
+    /// use s3::{Bucket, Credentials};
     ///
     /// let bucket_name = "rust-s3-test";
     /// let region = "us-east-1".parse().unwrap();
@@ -89,8 +86,7 @@ impl Bucket {
     /// # Example:
     ///
     /// ```rust,no_run
-    /// use s3::bucket::Bucket;
-    /// use s3::credentials::Credentials;
+    /// use s3::{Bucket, Credentials};
     ///
     /// let bucket_name = &"rust-s3-test";
     /// let region = "us-east-1".parse().unwrap();
@@ -111,8 +107,7 @@ impl Bucket {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use s3::bucket::Bucket;
-    /// use s3::credentials::Credentials;
+    /// use s3::{Bucket, Credentials};
     ///
     /// let bucket_name = &"rust-s3-test";
     /// let aws_access = &"access_key";
@@ -159,8 +154,8 @@ impl Bucket {
     ///
     /// ```rust,no_run
     /// use std::str;
-    /// use s3::bucket::Bucket;
-    /// use s3::credentials::Credentials;
+    /// use s3::{Bucket, Credentials};
+    ///
     /// let bucket_name = &"rust-s3-test";
     /// let aws_access = &"access_key";
     /// let aws_secret = &"secret_key";

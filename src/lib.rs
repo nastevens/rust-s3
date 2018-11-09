@@ -15,15 +15,22 @@ extern crate ini;
 extern crate dirs;
 
 
-pub mod bucket;
-pub mod credentials;
-pub mod command;
-pub mod error;
-pub mod region;
-pub mod request;
-pub mod serde_types;
-pub mod signing;
-pub mod deserializer;
+mod bucket;
+mod command;
+mod credentials;
+mod deserializer;
+mod error;
+mod region;
+mod request;
+mod serde_types;
+mod signing;
+
+pub use bucket::Bucket;
+pub use credentials::Credentials;
+pub use error::S3Error;
+pub use region::Region;
+pub use request::{Headers, Query};
+pub use serde_types::ListBucketResult;
 
 const LONG_DATE: &str = "%Y%m%dT%H%M%SZ";
 const EMPTY_PAYLOAD_SHA: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
