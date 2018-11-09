@@ -9,14 +9,19 @@ use error::{S3Result, S3Error};
 ///
 /// # Example
 /// ```
+/// # fn main() -> Result<(), Box<std::error::Error>> {
+/// #
 /// use std::str::FromStr;
 /// use s3::Region;
 ///
 /// // Parse from a string
-/// let region: Region = "us-east-1".parse().unwrap();
+/// let region: Region = "us-east-1".parse()?;
 ///
 /// // Choose region directly
 /// let region = Region::EuWest2;
+/// #
+/// #     Ok(())
+/// # }
 /// ```
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Region {

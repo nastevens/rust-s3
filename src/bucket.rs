@@ -13,17 +13,22 @@ use error::S3Result;
 
 /// # Example
 /// ```
-/// # // Fake  credentials so we don't access user's real credentials in tests
 /// # use std::env;
+/// # fn main() -> Result<(), Box<std::error::Error>> {
+/// # // Fake  credentials so we don't access user's real credentials in tests
 /// # env::set_var("AWS_ACCESS_KEY_ID", "AKIAIOSFODNN7EXAMPLE");
 /// # env::set_var("AWS_SECRET_ACCESS_KEY", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY");
+/// #
 /// use s3::{Bucket, Credentials};
 ///
 /// let bucket_name = "rust-s3-test";
-/// let region = "us-east-1".parse().unwrap();
+/// let region = "us-east-1".parse()?;
 /// let credentials = Credentials::default();
 ///
-/// let bucket = Bucket::new(bucket_name, region, credentials);
+/// let bucket = Bucket::new(bucket_name, region, credentials)?;
+/// #
+/// #     Ok(())
+/// # }
 /// ```
 #[derive(Clone, Debug)]
 pub struct Bucket {
@@ -51,17 +56,22 @@ impl Bucket {
     ///
     /// # Example
     /// ```
-    /// # // Fake  credentials so we don't access user's real credentials in tests
     /// # use std::env;
+    /// # fn main() -> Result<(), Box<std::error::Error>> {
+    /// # // Fake  credentials so we don't access user's real credentials in tests
     /// # env::set_var("AWS_ACCESS_KEY_ID", "AKIAIOSFODNN7EXAMPLE");
     /// # env::set_var("AWS_SECRET_ACCESS_KEY", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY");
+    /// #
     /// use s3::{Bucket, Credentials};
     ///
     /// let bucket_name = "rust-s3-test";
-    /// let region = "us-east-1".parse().unwrap();
+    /// let region = "us-east-1".parse()?;
     /// let credentials = Credentials::default();
     ///
-    /// let bucket = Bucket::new(bucket_name, region, credentials).unwrap();
+    /// let bucket = Bucket::new(bucket_name, region, credentials)?;
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     pub fn new(name: &str, region: Region, credentials: Credentials) -> S3Result<Bucket> {
         Ok(Bucket {
@@ -79,15 +89,20 @@ impl Bucket {
     /// # Example:
     ///
     /// ```rust,no_run
+    /// # fn main() -> Result<(), Box<std::error::Error>> {
+    /// #
     /// use s3::{Bucket, Credentials};
     ///
     /// let bucket_name = "rust-s3-test";
-    /// let region = "us-east-1".parse().unwrap();
+    /// let region = "us-east-1".parse()?;
     /// let credentials = Credentials::default();
-    /// let bucket = Bucket::new(bucket_name, region, credentials).unwrap();
+    /// let bucket = Bucket::new(bucket_name, region, credentials)?;
     ///
-    /// let (data, code) = bucket.get("/test.file").unwrap();
+    /// let (data, code) = bucket.get("/test.file")?;
     /// println!("Code: {}\nData: {:?}", code, data);
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     pub fn get(&self, path: &str) -> S3Result<(Vec<u8>, u32)> {
         let command = Command::Get;
@@ -100,15 +115,20 @@ impl Bucket {
     /// # Example:
     ///
     /// ```rust,no_run
+    /// # fn main() -> Result<(), Box<std::error::Error>> {
+    /// #
     /// use s3::{Bucket, Credentials};
     ///
     /// let bucket_name = &"rust-s3-test";
-    /// let region = "us-east-1".parse().unwrap();
+    /// let region = "us-east-1".parse()?;
     /// let credentials = Credentials::default();
-    /// let bucket = Bucket::new(bucket_name, region, credentials).unwrap();
+    /// let bucket = Bucket::new(bucket_name, region, credentials)?;
     ///
-    /// let (_, code) = bucket.delete("/test.file").unwrap();
+    /// let (_, code) = bucket.delete("/test.file")?;
     /// assert_eq!(204, code);
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     pub fn delete(&self, path: &str) -> S3Result<(Vec<u8>, u32)> {
         let command = Command::Delete;
@@ -121,6 +141,8 @@ impl Bucket {
     /// # Example
     ///
     /// ```rust,no_run
+    /// # fn main() -> Result<(), Box<std::error::Error>> {
+    /// #
     /// use s3::{Bucket, Credentials};
     ///
     /// let bucket_name = &"rust-s3-test";
@@ -128,13 +150,16 @@ impl Bucket {
     /// let aws_secret = &"secret_key";
     ///
     /// let bucket_name = &"rust-s3-test";
-    /// let region = "us-east-1".parse().unwrap();
+    /// let region = "us-east-1".parse()?;
     /// let credentials = Credentials::default();
-    /// let bucket = Bucket::new(bucket_name, region, credentials).unwrap();
+    /// let bucket = Bucket::new(bucket_name, region, credentials)?;
     ///
     /// let content = "I want to go to S3".as_bytes();
-    /// let (_, code) = bucket.put("/test.file", content, "text/plain").unwrap();
+    /// let (_, code) = bucket.put("/test.file", content, "text/plain")?;
     /// assert_eq!(201, code);
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     pub fn put(&self, path: &str, content: &[u8], content_type: &str) -> S3Result<(Vec<u8>, u32)> {
         let command = Command::Put {
@@ -167,6 +192,8 @@ impl Bucket {
     /// # Example
     ///
     /// ```rust,no_run
+    /// # fn main() -> Result<(), Box<std::error::Error>> {
+    /// #
     /// use std::str;
     /// use s3::{Bucket, Credentials};
     ///
@@ -175,15 +202,18 @@ impl Bucket {
     /// let aws_secret = &"secret_key";
     ///
     /// let bucket_name = &"rust-s3-test";
-    /// let region = "us-east-1".parse().unwrap();
+    /// let region = "us-east-1".parse()?;
     /// let credentials = Credentials::default();
-    /// let bucket = Bucket::new(bucket_name, region, credentials).unwrap();
+    /// let bucket = Bucket::new(bucket_name, region, credentials)?;
     ///
-    /// let results = bucket.list("/", Some("/")).unwrap();
+    /// let results = bucket.list("/", Some("/"))?;
     /// for (list, code) in results {
     ///     assert_eq!(200, code);
     ///     println!("{:?}", list);
     /// }
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     pub fn list(&self, prefix: &str, delimiter: Option<&str>) -> S3Result<Vec<(ListBucketResult, u32)>> {
         let mut results = Vec::new();
