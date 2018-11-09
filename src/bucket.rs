@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::mem;
 
+use reqwest::Client;
 use serde_xml;
 
 use credentials::Credentials;
@@ -24,13 +25,25 @@ use error::S3Result;
 ///
 /// let bucket = Bucket::new(bucket_name, region, credentials);
 /// ```
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Bucket {
     name: String,
     region: Region,
     credentials: Credentials,
     extra_headers: Headers,
     extra_query: Query,
+    client: Client,
+}
+
+fn build_client() -> S3Result<Client> {
+    if cfg!(feature = "no-verify-ssl") {
+        Ok(reqwest::Client::builder()
+            .danger_accept_invalid_certs(true)
+            .danger_accept_invalid_hostnames(true)
+            .build()?)
+    } else {
+        Ok(reqwest::Client::builder().build()?)
+    }
 }
 
 impl Bucket {
@@ -48,16 +61,17 @@ impl Bucket {
     /// let region = "us-east-1".parse().unwrap();
     /// let credentials = Credentials::default();
     ///
-    /// let bucket = Bucket::new(bucket_name, region, credentials);
+    /// let bucket = Bucket::new(bucket_name, region, credentials).unwrap();
     /// ```
-    pub fn new(name: &str, region: Region, credentials: Credentials) -> Bucket {
-        Bucket {
+    pub fn new(name: &str, region: Region, credentials: Credentials) -> S3Result<Bucket> {
+        Ok(Bucket {
             name: name.into(),
             region,
             credentials,
             extra_headers: HashMap::new(),
             extra_query: HashMap::new(),
-        }
+            client: build_client()?,
+        })
     }
 
     /// Gets file from an S3 path.
@@ -70,7 +84,7 @@ impl Bucket {
     /// let bucket_name = "rust-s3-test";
     /// let region = "us-east-1".parse().unwrap();
     /// let credentials = Credentials::default();
-    /// let bucket = Bucket::new(bucket_name, region, credentials);
+    /// let bucket = Bucket::new(bucket_name, region, credentials).unwrap();
     ///
     /// let (data, code) = bucket.get("/test.file").unwrap();
     /// println!("Code: {}\nData: {:?}", code, data);
@@ -91,7 +105,7 @@ impl Bucket {
     /// let bucket_name = &"rust-s3-test";
     /// let region = "us-east-1".parse().unwrap();
     /// let credentials = Credentials::default();
-    /// let bucket = Bucket::new(bucket_name, region, credentials);
+    /// let bucket = Bucket::new(bucket_name, region, credentials).unwrap();
     ///
     /// let (_, code) = bucket.delete("/test.file").unwrap();
     /// assert_eq!(204, code);
@@ -116,7 +130,7 @@ impl Bucket {
     /// let bucket_name = &"rust-s3-test";
     /// let region = "us-east-1".parse().unwrap();
     /// let credentials = Credentials::default();
-    /// let bucket = Bucket::new(bucket_name, region, credentials);
+    /// let bucket = Bucket::new(bucket_name, region, credentials).unwrap();
     ///
     /// let content = "I want to go to S3".as_bytes();
     /// let (_, code) = bucket.put("/test.file", content, "text/plain").unwrap();
@@ -163,7 +177,7 @@ impl Bucket {
     /// let bucket_name = &"rust-s3-test";
     /// let region = "us-east-1".parse().unwrap();
     /// let credentials = Credentials::default();
-    /// let bucket = Bucket::new(bucket_name, region, credentials);
+    /// let bucket = Bucket::new(bucket_name, region, credentials).unwrap();
     ///
     /// let results = bucket.list("/", Some("/")).unwrap();
     /// for (list, code) in results {
@@ -272,5 +286,9 @@ impl Bucket {
     /// API.
     pub fn extra_query_mut(&mut self) -> &mut Query {
         &mut self.extra_query
+    }
+
+    pub(crate) fn client(&self) -> &Client {
+        &self.client
     }
 }

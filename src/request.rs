@@ -6,7 +6,6 @@ use chrono::{DateTime, Utc};
 use command::Command;
 use error::S3Error;
 use hmac::{Hmac, Mac};
-use reqwest;
 use reqwest::header::{self, HeaderMap, HeaderName, HeaderValue};
 use sha2::{Digest, Sha256};
 use hex::ToHex;
@@ -183,16 +182,6 @@ impl<'a> Request<'a> {
     }
 
     pub fn execute(&self) -> S3Result<(Vec<u8>, u32)> {
-        // TODO: preserve client across requests
-        let client = if cfg!(feature = "no-verify-ssl") {
-            reqwest::Client::builder()
-                .danger_accept_invalid_certs(true)
-                .danger_accept_invalid_hostnames(true)
-                .build()?
-        } else {
-            reqwest::Client::new()
-        };
-
         // Build headers
         let headers = self.headers()?;
 
@@ -203,8 +192,9 @@ impl<'a> Request<'a> {
             Vec::new()
         };
 
-        // Build and sent HTTP request
-        let request = client
+        // Build and send HTTP request
+        let request = self.bucket
+            .client()
             .request(self.command.http_verb(), self.url())
             .headers(headers)
             .body(content);
@@ -247,7 +237,7 @@ mod tests {
     #[test]
     fn url_uses_https_by_default() {
         let region = "custom-region".parse().unwrap();
-        let bucket = Bucket::new("my-first-bucket", region, fake_credentials());
+        let bucket = Bucket::new("my-first-bucket", region, fake_credentials()).unwrap();
         let path = "/my-first/path";
         let request = Request::new(&bucket, path, Command::Get);
 
@@ -262,7 +252,7 @@ mod tests {
     #[test]
     fn url_uses_scheme_from_custom_region_if_defined() {
         let region = "http://custom-region".parse().unwrap();
-        let bucket = Bucket::new("my-second-bucket", region, fake_credentials());
+        let bucket = Bucket::new("my-second-bucket", region, fake_credentials()).unwrap();
         let path = "/my-second/path";
         let request = Request::new(&bucket, path, Command::Get);
 

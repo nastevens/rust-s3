@@ -12,7 +12,7 @@ pub fn main() {
     // Create Bucket in REGION for BUCKET
     let credentials = Credentials::default();
     let region = REGION.parse().unwrap();
-    let bucket = Bucket::new(BUCKET, region, credentials);
+    let bucket = Bucket::new(BUCKET, region, credentials).unwrap();
 
     // List out contents of directory
     let results = bucket.list("", None).unwrap();
