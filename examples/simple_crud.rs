@@ -30,13 +30,13 @@ pub fn main() {
     let (_, code) = bucket.delete("test_file").unwrap();
     assert_eq!(204, code);
 
-    // // Put a "test_file" with the contents of MESSAGE at the root of the
-    // // bucket.
+    // Put a "test_file" with the contents of MESSAGE at the root of the
+    // bucket.
     let (_, code) = bucket.put("test_file", MESSAGE.as_bytes(), "text/plain").unwrap();
     assert_eq!(200, code);
 
-    // // Get the "test_file" contents and make sure that the returned message
-    // // matches what we sent.
+    // Get the "test_file" contents and make sure that the returned message
+    // matches what we sent.
     let (data, code) = bucket.get("test_file").unwrap();
     let string = str::from_utf8(&data).unwrap();
     assert_eq!(200, code);
