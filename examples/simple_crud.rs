@@ -28,20 +28,24 @@ pub fn main() -> Result<(), Box<std::error::Error>> {
     // that the s3 library returns the HTTP code even if it indicates a failure
     // (i.e. 404) since we can't predict desired usage. For example, you may
     // expect a 404 to make sure a file doesn't exist.
+    println!("Deleting `test_file` if it exists");
     let (_, code) = bucket.delete("test_file")?;
     assert_eq!(204, code);
 
     // Put a "test_file" with the contents of MESSAGE at the root of the
     // bucket.
+    println!("Putting `test_file`");
     let (_, code) = bucket.put("test_file", MESSAGE.as_bytes(), "text/plain")?;
     assert_eq!(200, code);
 
     // Get the "test_file" contents and make sure that the returned message
     // matches what we sent.
+    println!("Getting `test_file`");
     let (data, code) = bucket.get("test_file")?;
     let string = str::from_utf8(&data)?;
     assert_eq!(200, code);
     assert_eq!(MESSAGE, string);
+    println!("Message was {:?}", string);
 
     Ok(())
 }
