@@ -1,15 +1,19 @@
 use std::collections::HashMap;
 use std::mem;
 
-use reqwest::Client;
+use futures::{Future, Stream};
+use futures::sync::oneshot;
+use reqwest::async::Client;
 use serde_xml;
+use tokio;
 
+use async::{Response, ResponseFuture};
 use credentials::Credentials;
 use command::Command;
 use region::Region;
 use request::{Request, Headers, Query};
 use serde_types::ListBucketResult;
-use error::S3Result;
+use error::{S3Error, S3Result};
 
 /// Primary interface to an AWS S3 bucket.
 ///
@@ -44,12 +48,12 @@ pub struct Bucket {
 
 fn build_client() -> S3Result<Client> {
     if cfg!(feature = "no-verify-ssl") {
-        Ok(reqwest::Client::builder()
+        Ok(Client::builder()
             .danger_accept_invalid_certs(true)
             .danger_accept_invalid_hostnames(true)
             .build()?)
     } else {
-        Ok(reqwest::Client::builder().build()?)
+        Ok(Client::builder().build()?)
     }
 }
 
@@ -109,6 +113,31 @@ impl Bucket {
     pub fn get(&self, path: &str) -> S3Result<(Vec<u8>, u32)> {
         let command = Command::Get;
         let request = Request::new(self, path, command);
+        let (tx, rx) = oneshot::channel::<Result<(Vec<u8>, u32), S3Error>>();
+        tokio::run(request.execute()?.and_then(|response| {
+            response.stream().concat2().map_err(|e| e.into())
+        }).map_err(|_| ())
+        .and_then(|cat_chunks| {
+            tx.send(Ok((cat_chunks.to_vec(), 0))).expect("Closed end");
+            Ok(())
+        }).map_err(|_| ()));
+        // tokio::run(
+        //     request.execute().and_then(|response| {
+        //         // let status = response.status();
+        //         response.stream().concat2()
+        //     }).and_then(|cat_chunks| {
+        //         tx.send(Ok((cat_chunks.to_vec(), 0))).map_err(|_| ())
+        //     }));
+        // rx.wait()
+        Ok((Vec::new(), 0))
+
+    }
+
+    /// Gets file from an S3 path, returning a future that resolves into a
+    /// stream of returned bytes.
+    pub fn get_async(&self, path: &str) -> S3Result<ResponseFuture> {
+        let command = Command::Get;
+        let request = Request::new(self, path, command);
         request.execute()
     }
 
@@ -135,7 +164,7 @@ impl Bucket {
     pub fn delete(&self, path: &str) -> S3Result<(Vec<u8>, u32)> {
         let command = Command::Delete;
         let request = Request::new(self, path, command);
-        request.execute()
+        request.execute()?.wait()?.block_on_result()
     }
 
     /// Put into an S3 bucket.
@@ -169,7 +198,7 @@ impl Bucket {
             content_type,
         };
         let request = Request::new(self, path, command);
-        request.execute()
+        request.execute()?.wait()?.block_on_result()
     }
 
     fn _list(&self,
@@ -183,7 +212,7 @@ impl Bucket {
             continuation_token,
         };
         let request = Request::new(self, "/", command);
-        let result = request.execute()?;
+        let result = request.execute()?.wait()?.block_on_result()?;
         let result_string = String::from_utf8_lossy(&result.0);
         let deserialized: ListBucketResult = serde_xml::deserialize(result_string.as_bytes())?;
         Ok((deserialized, result.1))

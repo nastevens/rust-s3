@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::io::Read;
 
+use async::ResponseFuture;
 use bucket::Bucket;
 use chrono::{DateTime, Utc};
 use command::Command;
@@ -181,7 +182,16 @@ impl<'a> Request<'a> {
         Ok(headers)
     }
 
-    pub fn execute(&self) -> S3Result<(Vec<u8>, u32)> {
+    pub(crate) fn execute(&self) -> S3Result<ResponseFuture> {
+        let client = if cfg!(feature = "no-verify-ssl") {
+            reqwest::async::Client::builder()
+                .danger_accept_invalid_certs(true)
+                .danger_accept_invalid_hostnames(true)
+                .build()?
+        } else {
+            reqwest::async::Client::new()
+        };
+
         // Build headers
         let headers = self.headers()?;
 
@@ -193,29 +203,12 @@ impl<'a> Request<'a> {
         };
 
         // Build and send HTTP request
-        let request = self.bucket
-            .client()
+        let request = client
             .request(self.command.http_verb(), self.url())
             .headers(headers)
             .body(content);
-        let mut response = request.send()?;
 
-        // Read and process response
-        let mut dst = Vec::new();
-        response.read_to_end(&mut dst)?;
-
-        let resp_code = u32::from(response.status().as_u16());
-        if resp_code < 300 {
-            Ok((dst, resp_code))
-        } else {
-            let deserialized: AwsError = serde_xml::deserialize(dst.as_slice())?;
-            let err = ErrorKind::AwsError {
-                info: deserialized,
-                status: resp_code,
-                body: String::from_utf8_lossy(dst.as_slice()).into_owned(),
-            };
-            Err(err.into())
-        }
+        Ok(ResponseFuture::Pending(Box::new(request.send())))
     }
 }
 

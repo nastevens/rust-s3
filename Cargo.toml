@@ -24,11 +24,10 @@ serde_derive = "^1.0.11"
 serde = "^1.0.11"
 serde-xml-rs = "^0.2.1"
 sha2 = "^0.6.0"
+tokio = "0.1"
 url = "^1.5.1"
 rust-ini = "^0.9"
-
-[dev-dependencies]
-tokio = "0.1"
+dirs = "^1.0.0"
 
 [features]
 no-verify-ssl = []
